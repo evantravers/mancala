@@ -20,29 +20,33 @@ class Mancala
   def move(player, pit)
     # going to be a value between 1 and numpieces
     puts "moving player #{player}'s pit \##{pit}"
-    pit=pit.to_i-1
+    pit=pit.to_i
     # TODO I hate this 
     if player == "p1h"
-      remaining = @p1s[pit]
-      @p1s[pit]=0
-      @p1s[pit+1, remaining]=@p1s[pit+1, remaining].map!{|t| t += 1}
-      if remaining
+      remaining = @p1s[pit-1]
+      puts remaining
+      @p1s[pit-1]=0
+      @p1s[pit, remaining]=@p1s[pit, remaining].map!{|t| t += 1}
+      # subtract the items you have dropped
+      remaining = remaining - @p1s[pit..-1].size
+      if remaining > 0
         # put one in your home
         remaining -= 1
         @p1h += 1
-        if remaining
+        if remaining > 0
           @p2s[0, remaining]=@p1s[0, remaining].map!{|t| t += 1}
         end
       end
     else
-      remaining = @p2s[pit]
-      @p2s[pit]=0
-      @p2s[pit+1, remaining]=@p2s[pit+1, remaining].map!{|t| t += 1}
-      if remaining
+      remaining = @p2s[pit-1]
+      @p2s[pit-1]=0
+      @p2s[pit, remaining]=@p2s[pit, remaining].map!{|t| t += 1}
+      remaining = remaining - @p2s[pit..-1].size
+      if remaining > 0 
         # put one in your home
         remaining -= 1
         @p2h += 1
-        if remaining
+        if remaining > 0
           @p1s[0, remaining]=@p1s[0, remaining].map!{|t| t += 1}
         end
       end
