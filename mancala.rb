@@ -35,6 +35,10 @@ class Mancala
         @p1h += 1
         if remaining > 0
           @p2s[0, remaining]=@p1s[0, remaining].map!{|t| t += 1}
+        else
+          puts self
+          puts "you get another turn!"
+          move("p1h", gets.chomp!)
         end
       end
     else
@@ -48,6 +52,10 @@ class Mancala
         @p2h += 1
         if remaining > 0
           @p1s[0, remaining]=@p1s[0, remaining].map!{|t| t += 1}
+        else
+          puts self
+          puts "you get another turn!"
+          move("p1h", gets.chomp!)
         end
       end
     end
