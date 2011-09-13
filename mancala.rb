@@ -21,15 +21,16 @@ class Mancala
     # going to be a value between 1 and numpieces
     puts "moving player #{player}'s pit \##{pit}"
     pit=pit.to_i
-    # TODO I hate this 
+    # TODO I hate this player selection. Make this DRY please kthxbai
     if player == "p1h"
       remaining = @p1s[pit-1]
-      puts remaining
+      range = remaining
       @p1s[pit-1]=0
       @p1s[pit, remaining]=@p1s[pit, remaining].map!{|t| t += 1}
       # subtract the items you have dropped
       remaining = remaining - @p1s[pit..-1].size
       if remaining > 0
+        # then this goes around the board
         # put one in your home
         remaining -= 1
         @p1h += 1
@@ -40,9 +41,18 @@ class Mancala
           puts "you get another turn!"
           move("p1h", gets.chomp!)
         end
+      else
+        # ending on this side of the board... gotta check empty
+        # going to be a 1 if capture, because you've already put down the rest of the pieces
+        if @p1s[pit+range-1] == 1
+          puts "empty! you capture!"
+          @p1h += @p2s[-1 * (pit+range)]
+          @p2s[-1 * (pit+range)] = 0
+        end
       end
     else
       remaining = @p2s[pit-1]
+      range = remaining
       @p2s[pit-1]=0
       @p2s[pit, remaining]=@p2s[pit, remaining].map!{|t| t += 1}
       remaining = remaining - @p2s[pit..-1].size
@@ -55,7 +65,15 @@ class Mancala
         else
           puts self
           puts "you get another turn!"
-          move("p1h", gets.chomp!)
+          move("p2h", gets.chomp!)
+        end
+      else
+        # ending on this side of the board... gotta check empty
+        # going to be a 1 if capture, because you've already put down the rest of the pieces
+        if @p2s[pit+range-1] == 1
+          puts "empty! you capture!"
+          @p2h += @p1s[-1 * (pit+range)]
+          @p1s[-1 * (pit+range)] = 0
         end
       end
     end
@@ -78,6 +96,11 @@ class Mancala
       else
         p=1
       end
+    end
+    if @p1h > @p2h
+      puts "Player one wins with #{@p1h} to #{@p2h}!"
+    else
+      puts "Player two wins with #{@p2h} to #{@p1h}!"
     end
   end
 
