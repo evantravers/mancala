@@ -40,7 +40,6 @@ class Mancala
     # going to be a value between 1 and numpieces
     puts "moving player #{player.number}'s pit \##{pit}"
     pit=pit.to_i
-    # TODO I hate this player selection. Make this DRY please kthxbai
     remaining = player[pit-1]
     range = remaining
     player.pits[pit-1]=0
