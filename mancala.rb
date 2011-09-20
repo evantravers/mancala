@@ -9,8 +9,12 @@ class Player
   @pits
   attr_reader :number
   attr_accessor :score, :pits
-  def initialize(player, is_human=true)
-    @human = is_human
+  def initialize(player, engine=nil)
+    if !engine
+      @human = true
+    else
+      @engine = engine
+    end
     @score = 0
     @number = player
     @pits = Array.new(6).map{|slot| slot = 3}
@@ -24,7 +28,6 @@ class Player
 end
 
 class Mancala
-  # TODO change this based on the botc
   @p1
   @p2
   @gameover
@@ -37,14 +40,19 @@ class Mancala
   end
 
   def pick_pit(player)
-    input = gets.chomp!.to_i
+    input = gets.chomp!
+    if input == "exit"
+      puts "bye!"
+      exit
+    end
+    input = input.to_i
     until [1, 2, 3, 4, 5, 6].include?(input)
-      puts "Please enter an integer from 1-6"
+      puts "Please enter an integer from 1-6:"
       input = gets.chomp!.to_i
     end
-    if player[input] == 0
-      puts "Don't pick an empty space!"
-      pick_pit(player)
+    until player[input-1] != 0
+      puts "Don't pick an empty space! Pick again:"
+      input = gets.chomp!.to_i
     end
     return input
   end
@@ -69,7 +77,7 @@ class Mancala
       else
         unless player.pits.inject(:+) == 0
           puts self
-          puts "you get another turn!"
+          puts "You get another turn!"
           move(player, opponent, pick_pit(player))
         end
       end
@@ -77,7 +85,7 @@ class Mancala
       # ending on this side of the board... gotta check empty
       # going to be a 1 if capture, because you've already put down the rest of the pieces
       if player[pit+range-1] == 1
-        puts "empty! you capture!"
+        puts "Empty! You capture!"
         player.score += opponent[-1 * (pit+range)]
         opponent.pits[-1 * (pit+range)] = 0
       end
