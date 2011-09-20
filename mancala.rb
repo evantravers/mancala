@@ -7,12 +7,13 @@ class Player
   @human
   @engine
   @pits
-  attr_reader :number
+  attr_reader :number, :human
   attr_accessor :score, :pits
   def initialize(player, engine=nil)
     if !engine
       @human = true
     else
+      @human = false
       @engine = engine
     end
     @score = 0
@@ -32,7 +33,7 @@ class Mancala
   @p2
   @gameover
 
-  def initialize
+  def initialize(num_players)
     # create the arrays and fill them in w/ proper # of pieces.
     @gameover = false
     @p1 = Player.new(1)
@@ -40,26 +41,34 @@ class Mancala
   end
 
   def pick_pit(player)
-    input = gets.chomp!
-    if input == "exit"
-      puts "bye!"
-      exit
+    if player.human
+      puts self
+      puts "Player #{player.number}, enter your move!"
+      move = gets.chomp!
+      if move == "exit"
+        puts "bye!"
+        exit
+      end
+      move = move.to_i
+      until 1.upto(6).include?(move)
+        puts "Please enter an integer from 1-6:"
+        move = gets.chomp!.to_i
+      end
+      until player[move-1] != 0
+        puts "Don't pick an empty space! Pick again:"
+        move = gets.chomp!.to_i
+      end
+    else
+      # bot!
+      puts "The diabolical computer opponent is thinking..."
+      move = 1 + rand(6)
     end
-    input = input.to_i
-    until [1, 2, 3, 4, 5, 6].include?(input)
-      puts "Please enter an integer from 1-6:"
-      input = gets.chomp!.to_i
-    end
-    until player[input-1] != 0
-      puts "Don't pick an empty space! Pick again:"
-      input = gets.chomp!.to_i
-    end
-    return input
+    return move
   end
 
   def move(player, opponent, pit)
     # going to be a value between 1 and numpieces
-    puts "moving player #{player.number}'s pit \##{pit}"
+    puts "moving player #{player.number}'s pit \##{pit}\n"
     pit=pit.to_i
     remaining = player[pit-1]
     range = remaining
@@ -76,7 +85,6 @@ class Mancala
         opponent.pits[0, remaining]=player.pits[0, remaining].map!{|t| t += 1}
       else
         unless player.pits.inject(:+) == 0
-          puts self
           puts "You get another turn!"
           move(player, opponent, pick_pit(player))
         end
@@ -100,8 +108,6 @@ class Mancala
 
     until @gameover
       # prompt player
-      puts self
-      puts "Player #{player.number}, enter your move!"
       move(player, opponent, pick_pit(player))
       @gameover = true if player.pits.inject(:+)==0 or opponent.pits.inject(:+)==0
       # switch positions
@@ -131,5 +137,13 @@ class Mancala
   end
 end
 
-b = Mancala.new
+puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
+puts "============================"
+puts "How many human players? (0-2)"
+num_players = gets.chomp!
+until 0.upto(2).include?(num_players.to_i)
+  puts "whoops, try again:\n"
+  num_players = gets.chomp!
+end
+b = Mancala.new(num_players)
 b.game
