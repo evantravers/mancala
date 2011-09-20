@@ -38,14 +38,16 @@ class Mancala
         if remaining > 0
           @p2s[0, remaining]=@p1s[0, remaining].map!{|t| t += 1}
         else
-          puts self
-          puts "you get another turn!"
-          input = gets.chomp!.to_i
-          until [1, 2, 3, 4, 5, 6].include?(input)
-            puts "please enter an integer from 1-6"
+          unless @p1s.inject(:+) == 0
+            puts self
+            puts "you get another turn!"
             input = gets.chomp!.to_i
+            until [1, 2, 3, 4, 5, 6].include?(input)
+              puts "please enter an integer from 1-6"
+              input = gets.chomp!.to_i
+            end
+            move("p1h", input)
           end
-          move("p1h", input)
         end
       else
         # ending on this side of the board... gotta check empty
@@ -69,15 +71,17 @@ class Mancala
         if remaining > 0
           @p1s[0, remaining]=@p1s[0, remaining].map!{|t| t += 1}
         else
-          puts self
-          puts "you get another turn!"
-          input = gets.chomp!.to_i
-          until [1, 2, 3, 4, 5, 6].include?(input)
-            puts "please enter an integer from 1-6"
+          unless @p2s.inject(:+) == 0
+            puts self
+            puts "you get another turn!"
             input = gets.chomp!.to_i
+            until [1, 2, 3, 4, 5, 6].include?(input)
+              puts "please enter an integer from 1-6"
+              input = gets.chomp!.to_i
 
+            end
+            move("p2h", input)
           end
-          move("p2h", input)
         end
       else
         # ending on this side of the board... gotta check empty
@@ -122,7 +126,13 @@ class Mancala
   end
 
   def to_s
-    "\t#{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]} \t\n\t#{p2h}           #{p1h}\n\t #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]} \t\n\n"
+    if p1h.to_s.size == 1 
+      p1h_b = " " + p1h.to_s
+    end
+    if p2h.to_s.size == 1 
+      p2h_b = " " + p2h.to_s
+    end
+"        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2|#{p2h_b}            #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6"
   end
 end
 
