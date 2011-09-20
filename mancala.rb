@@ -36,8 +36,17 @@ class Mancala
   def initialize(num_players)
     # create the arrays and fill them in w/ proper # of pieces.
     @gameover = false
-    @p1 = Player.new(1)
-    @p2 = Player.new(2)
+    num_players = num_players.to_i
+    if num_players > 0
+      @p1 = Player.new(1)
+    else
+      @p1 = Player.new(1, "dumb")
+    end
+    if num_players < 2
+      @p2 = Player.new(2, "dumb")
+    else
+      @p2 = Player.new(2)
+    end
   end
 
   def pick_pit(player)
@@ -60,6 +69,7 @@ class Mancala
       end
     else
       # bot!
+      # TODO abstract this out of here into the engine
       puts "The diabolical computer opponent is thinking..."
       move = 1 + rand(6)
     end
@@ -115,9 +125,9 @@ class Mancala
     end
     # TODO refactor this
     if @p1.score > @p2.score
-      puts "Player one wins with #{@p1.get_score} to #{@p2.get_score}!"
+      puts "Player one wins with #{@p1.score} to #{@p2.score}!"
     else
-      puts "Player two wins with #{@p2.get_score} to #{@p1.get_score}!"
+      puts "Player two wins with #{@p2.score} to #{@p1.score}!"
     end
   end
 
