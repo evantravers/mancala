@@ -36,6 +36,19 @@ class Mancala
     @p2 = Player.new(2)
   end
 
+  def pick_pit(player)
+    input = gets.chomp!.to_i
+    until [1, 2, 3, 4, 5, 6].include?(input)
+      puts "Please enter an integer from 1-6"
+      input = gets.chomp!.to_i
+    end
+    if player[input] == 0
+      puts "Don't pick an empty space!"
+      pick_pit(player)
+    end
+    return input
+  end
+
   def move(player, opponent, pit)
     # going to be a value between 1 and numpieces
     puts "moving player #{player.number}'s pit \##{pit}"
@@ -57,12 +70,7 @@ class Mancala
         unless player.pits.inject(:+) == 0
           puts self
           puts "you get another turn!"
-          input = gets.chomp!.to_i
-          until [1, 2, 3, 4, 5, 6].include?(input)
-            puts "please enter an integer from 1-6"
-            input = gets.chomp!.to_i
-          end
-          move(player, opponent, input)
+          move(player, opponent, pick_pit(player))
         end
       end
     else
@@ -86,12 +94,7 @@ class Mancala
       # prompt player
       puts self
       puts "Player #{player.number}, enter your move!"
-      input = gets.chomp!.to_i
-      until [1, 2, 3, 4, 5, 6].include?(input)
-        puts "please enter an integer from 1-6"
-        input = gets.chomp!.to_i
-      end
-      move(player, opponent, input)
+      move(player, opponent, pick_pit(player))
       @gameover = true if player.pits.inject(:+)==0 or opponent.pits.inject(:+)==0
       # switch positions
       player, opponent = opponent, player
