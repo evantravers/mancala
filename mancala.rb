@@ -1,4 +1,5 @@
 require 'pp'
+require 'pry'
 
 class Mancala
   @p1s
@@ -39,7 +40,12 @@ class Mancala
         else
           puts self
           puts "you get another turn!"
-          move("p1h", gets.chomp!)
+          input = gets.chomp!.to_i
+          until [1, 2, 3, 4, 5, 6].include?(input)
+            puts "please enter an integer from 1-6"
+            input = gets.chomp!.to_i
+          end
+          move("p1h", input)
         end
       else
         # ending on this side of the board... gotta check empty
@@ -65,7 +71,13 @@ class Mancala
         else
           puts self
           puts "you get another turn!"
-          move("p2h", gets.chomp!)
+          input = gets.chomp!.to_i
+          until [1, 2, 3, 4, 5, 6].include?(input)
+            puts "please enter an integer from 1-6"
+            input = gets.chomp!.to_i
+
+          end
+          move("p2h", input)
         end
       else
         # ending on this side of the board... gotta check empty
@@ -88,7 +100,12 @@ class Mancala
       # prompt player
       puts self
       puts "Player #{p}, enter your move!"
-      move("p#{p}h", gets.chomp!)
+      input = gets.chomp!.to_i
+      until [1, 2, 3, 4, 5, 6].include?(input)
+        puts "please enter an integer from 1-6"
+        input = gets.chomp!.to_i
+      end
+      move("p#{p}h", input)
       @gameover = true if @p1s.inject(:+)==0 or @p2s.inject(:+)==0
       # TODO there must be a more elegant way to play this
       if p==1
