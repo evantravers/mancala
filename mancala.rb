@@ -1,5 +1,6 @@
 require 'pp'
 require 'pry'
+require './engine.rb'
 
 class Player
   @number
@@ -20,11 +21,17 @@ class Player
     @number = player
     @pits = Array.new(6).map{|slot| slot = 3}
   end
+
   def [] n
     @pits[n]
   end
+
   def []= n, a
     @pits[n] = a
+  end
+  
+  def engine_eval(opponent)
+    @engine.evaluate(@score, @pits, opponent.score, opponent.pits)
   end
 end
 
@@ -37,19 +44,20 @@ class Mancala
     # create the arrays and fill them in w/ proper # of pieces.
     @gameover = false
     num_players = num_players.to_i
+    # TODO refactor this
     if num_players > 0
       @p1 = Player.new(1)
     else
-      @p1 = Player.new(1, "dumb")
+      @p1 = Player.new(1, Engine.new("Diabolical Computer Opponent"))
     end
     if num_players < 2
-      @p2 = Player.new(2, "dumb")
+      @p2 = Player.new(2, Engine.new("Blavis"))
     else
       @p2 = Player.new(2)
     end
   end
 
-  def pick_pit(player)
+  def pick_pit(player, opponent)
     if player.human
       puts self
       puts "Player #{player.number}, enter your move!"
@@ -70,8 +78,7 @@ class Mancala
     else
       # bot!
       # TODO abstract this out of here into the engine
-      puts "The diabolical computer opponent is thinking..."
-      move = 1 + rand(6)
+      move = player.engine_eval(opponent)
     end
     return move
   end
@@ -96,7 +103,7 @@ class Mancala
       else
         unless player.pits.inject(:+) == 0
           puts "You get another turn!"
-          move(player, opponent, pick_pit(player))
+          move(player, opponent, pick_pit(player, opponent))
         end
       end
     else
@@ -118,7 +125,7 @@ class Mancala
 
     until @gameover
       # prompt player
-      move(player, opponent, pick_pit(player))
+      move(player, opponent, pick_pit(player, opponent))
       @gameover = true if player.pits.inject(:+)==0 or opponent.pits.inject(:+)==0
       # switch positions
       player, opponent = opponent, player
@@ -141,9 +148,9 @@ class Mancala
       p1h_b = " " + p1h_b
     end
     if p2h_b.size == 1 
-      p2h_b = " " + p2h_b
+      p2h_b = p2h_b + " "
     end
-    "        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2|#{p2h_b}            #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6"
+    "        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6"
   end
 end
 
