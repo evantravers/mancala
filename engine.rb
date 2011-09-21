@@ -10,7 +10,7 @@ class Engine
     until ppits[move-1] != 0
       move = 1 + rand(6)
     end
-    sleep(1)
+    # sleep(1)
     return move
   end
   

@@ -153,11 +153,15 @@ class Mancala
       # switch positions
       player, opponent = opponent, player
     end
+
     # TODO refactor this
+    puts self
     if @p1.score > @p2.score
-      puts "#{@p1} wins with #{@p1.score} to #{@p2.score}!"
+      puts "P1 (#{@p1}) wins with #{@p1.score} to #{@p2.score}!"
+    elsif @p2.score > @p1.score
+      puts "P2 (#{@p2}) wins with #{@p2.score} to #{@p1.score}!"
     else
-      puts "#{@p2} wins with #{@p2.score} to #{@p1.score}!"
+      puts "It's a tie! Everybody wins!"
     end
   end
 
@@ -173,7 +177,7 @@ class Mancala
     if p2h_b.size == 1 
       p2h_b = p2h_b + " "
     end
-    "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6"
+    "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6\n\n"
   end
 end
 
