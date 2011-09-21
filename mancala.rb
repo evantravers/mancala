@@ -33,6 +33,14 @@ class Player
   def engine_eval(opponent)
     @engine.evaluate(@score, @pits, opponent.score, opponent.pits)
   end
+  
+  def to_s
+    if human
+      "Player #{number}"
+    else
+      @engine.name
+    end
+  end
 end
 
 class Mancala
@@ -69,7 +77,7 @@ class Mancala
   def pick_pit(player, opponent)
     if player.human
       puts self
-      puts "Player #{player.number}, enter your move!"
+      puts "#{player}, enter your move!"
       move = gets.chomp!
       if move == "exit"
         puts "bye!"
@@ -88,7 +96,7 @@ class Mancala
       # bot!
       puts self
       # TODO abstract this out of here into the engine
-      puts "#{player.engine.name} is thinking... "
+      puts "#{player} is thinking... "
       move = player.engine_eval(opponent)
     end
     return move
@@ -100,7 +108,7 @@ class Mancala
 
   def move(player, opponent, pit)
     # going to be a value between 1 and numpieces
-    puts "moving player #{player.number}'s pit \##{pit}\n"
+    puts "moving #{player}'s pit \##{pit}\n"
     pit=pit.to_i
     remaining = player[pit-1]
     range = remaining
@@ -147,9 +155,9 @@ class Mancala
     end
     # TODO refactor this
     if @p1.score > @p2.score
-      puts "Player one wins with #{@p1.score} to #{@p2.score}!"
+      puts "#{@p1} wins with #{@p1.score} to #{@p2.score}!"
     else
-      puts "Player two wins with #{@p2.score} to #{@p1.score}!"
+      puts "#{@p2} wins with #{@p2.score} to #{@p1.score}!"
     end
   end
 
@@ -165,7 +173,7 @@ class Mancala
     if p2h_b.size == 1 
       p2h_b = p2h_b + " "
     end
-    "        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6"
+    "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6"
   end
 end
 
