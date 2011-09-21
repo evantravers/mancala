@@ -8,7 +8,7 @@ class Player
   @human
   @engine
   @pits
-  attr_reader :number, :human
+  attr_reader :number, :human, :engine
   attr_accessor :score, :pits
   def initialize(player, engine=nil)
     if !engine
@@ -40,7 +40,16 @@ class Mancala
   @p2
   @gameover
 
-  def initialize(num_players)
+  def initialize
+    puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
+    puts "============================"
+    puts "How many human players? (0-2)"
+    num_players = gets.chomp!
+    until 0.upto(2).include?(num_players.to_i)
+      puts "whoops, try again:\n"
+      num_players = gets.chomp!
+    end
+    
     # create the arrays and fill them in w/ proper # of pieces.
     @gameover = false
     num_players = num_players.to_i
@@ -48,10 +57,10 @@ class Mancala
     if num_players > 0
       @p1 = Player.new(1)
     else
-      @p1 = Player.new(1, Engine.new("Diabolical Computer Opponent"))
+      @p1 = Player.new(1, Engine.new("Master Control Program"))
     end
     if num_players < 2
-      @p2 = Player.new(2, Engine.new("Blavis"))
+      @p2 = Player.new(2, Engine.new("HAL 9000"))
     else
       @p2 = Player.new(2)
     end
@@ -77,10 +86,16 @@ class Mancala
       end
     else
       # bot!
+      puts self
       # TODO abstract this out of here into the engine
+      puts "#{player.engine.name} is thinking... "
       move = player.engine_eval(opponent)
     end
     return move
+    
+    def state
+      return @p1.score, @p1.pits, @p2.score, @p2.pits      
+    end
   end
 
   def move(player, opponent, pit)
@@ -117,7 +132,7 @@ class Mancala
     end
   end
 
-  def game
+  def play
     # this should be the game loop
     # you should check for moves, then check to see if game has ended
     player    = @p1
@@ -154,13 +169,5 @@ class Mancala
   end
 end
 
-puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
-puts "============================"
-puts "How many human players? (0-2)"
-num_players = gets.chomp!
-until 0.upto(2).include?(num_players.to_i)
-  puts "whoops, try again:\n"
-  num_players = gets.chomp!
-end
-b = Mancala.new(num_players)
-b.game
+game = Mancala.new
+game.play

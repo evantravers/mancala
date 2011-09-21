@@ -1,8 +1,8 @@
 class Engine
   @name
   attr_reader :name
-  def intialize(name)
-    @name = name
+  def initialize(n)
+    @name = n
   end
 
   def evaluate(pscore, ppits, oscore, opits)
@@ -11,5 +11,9 @@ class Engine
       move = 1 + rand(6)
     end
     return move
+  end
+  
+  def to_s
+    puts @name
   end
 end
