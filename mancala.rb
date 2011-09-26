@@ -106,8 +106,8 @@ class Mancala
     end
   end
 
+  # accepts a value between 1 and 6
   def move(player, opponent, pit)
-    # going to be a value between 1 and numpieces
     puts "moving #{player}'s pit \##{pit}\n"
     pit=pit.to_i
     remaining = player[pit-1]
