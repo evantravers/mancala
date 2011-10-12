@@ -2,4 +2,6 @@ this will be a simple implentation and AI for the game mancala.
 
 I'm putting this together for fun, and for my Games and Puzzles Seminar class at UAB.
 
+Now that I have a basic AI using some rules, I intend to write a evaluation function, combined with some tree search. 
+
 Thinking about using ruby...

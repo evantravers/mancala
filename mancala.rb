@@ -1,5 +1,4 @@
 require 'pp'
-require 'pry'
 require './engine.rb'
 
 class Player
@@ -31,7 +30,7 @@ class Player
   end
   
   def engine_eval(opponent)
-    @engine.evaluate(@score, @pits, opponent.score, opponent.pits)
+    @engine.evaluate(self, opponent)
   end
   
   def to_s
@@ -177,8 +176,13 @@ class Mancala
     if p2h_b.size == 1 
       p2h_b = p2h_b + " "
     end
+    # TODO colorate this?
     "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6\n\n"
   end
+end
+
+class Game
+
 end
 
 game = Mancala.new

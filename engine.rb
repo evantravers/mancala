@@ -5,28 +5,40 @@ class Engine
     @name = n
   end
 
-  def evaluate(pscore, ppits, oscore, opits)
-    sleep(1)
+  def evaluate(p1, p2)
+    # TODO treesearch. :)
+    # Also, evaluation function.
+    # What should be in said eval function?
+    # - Points in the home
+    points = p1.score
+    # - Points in opponents home
+    enemy_points = p2.score
+    # - possible move agains
+    bonusmoves = 0
+    # - possible captures
+    captures = 0
+    # - some small # for the ones that you could move past your home
     # pick a random move if you can't find another
     move = 1 + rand(6)
-    until ppits[move-1] != 0
+    until p1.pits[move-1] != 0
       move = 1 + rand(6)
     end
     # look for captures
-    # TODO make sure this code works.
-    ppits.each_with_index do | opt, i |
-      if ppits[i+opt] == 0 and opt != 0
-        move = i + 1
+    p1.pits.each_with_index do | opt, i |
+      if p1.pits[i+opt] == 0 and opt != 0
+        captures += 1
       end
     end
     # check to see if it can move again
-    ppits.each_with_index do | opt, i |
-      if (ppits.size - i == opt and opt != 0)
-        puts "found a move"
-        move = i + 1
+    p1.pits.each_with_index do | opt, i |
+      if (p1.pits.size - i == opt and opt != 0)
+        bonusmoves += 1
       end
     end
-    # sleep(1)
+    # we should have all the variables needed for an eval
+    p1.pits.each do | option |
+      # evaluate each possible next move, then return the best move
+    end
     return move
   end
   
