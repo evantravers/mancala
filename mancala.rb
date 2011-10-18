@@ -2,6 +2,14 @@ require 'pp'
 require 'pry'
 require './engine.rb'
 
+Names_of_bots = ["Master Control Program", "Tron", "Hal 9000", "Marvin the Paranoid Android", "SHODAN", "EDI", "Cortana", "343 Guilty Spark", "The Intersect", "S.A.R.A.H.", "LCARS"]
+
+def instrument(string, display=false)
+  if display
+    puts string
+  end
+end
+
 class Player
   @number
   @score
@@ -11,12 +19,12 @@ class Player
   attr_reader :number, :human, :engine
   attr_accessor :score, :pits
 
-  def initialize(player, engine=nil)
-    if !engine
+  def initialize(player, engine)
+    if engine == 0
       @human = true
     else
       @human = false
-      @engine = engine
+      @engine = Engine.new(Names_of_bots[rand(Names_of_bots.size)], engine)
     end
     @score = 0
     @number = player
@@ -36,10 +44,9 @@ class Player
   end
   
   def clone
-    clone = self.clone
-    clone.score = @score.clone
+    clone = self.dup
+    clone.score = @score
     clone.pits = @pits.clone
-    clone = Marshal.load(Marshal.dump(self))
     return clone
   end
 
@@ -64,7 +71,7 @@ class Mancala
 
   def pick_pit(player, opponent)
     if player.human
-      puts self
+      instrument(self, player.human)
       puts "#{player}, enter your move!"
       move = gets.chomp!
       if move == "exit"
@@ -82,7 +89,7 @@ class Mancala
       end
     else
       # bot!
-      puts self
+      instrument(self, true)
       # TODO abstract this out of here into the engine
       puts "#{player} is thinking... "
       move = player.engine_eval(opponent)
@@ -95,8 +102,11 @@ class Mancala
   end
 
   # accepts a value between 1 and 6
-  def move(player, opponent, pit)
-    puts "moving #{player}'s pit \##{pit}\n"
+  def move(player, opponent, pit, display=false)
+    if player.human
+      display = true
+    end
+    instrument("moving #{player}'s pit \##{pit}\n", display)
     pit=pit.to_i
     remaining = player[pit-1]
     range = remaining
@@ -113,15 +123,15 @@ class Mancala
         opponent.pits[0, remaining]=player.pits[0, remaining].map!{|t| t += 1}
       else
         unless player.pits.inject(:+) == 0
-          puts "You get another turn!"
-          move(player, opponent, pick_pit(player, opponent))
+          instrument("You get another turn!", display)
+          move(player, opponent, pick_pit(player, opponent), true)
         end
       end
     else
       # ending on this side of the board... gotta check empty
       # going to be a 1 if capture, because you've already put down the rest of the pieces
       if player[pit+range-1] == 1
-        puts "Empty! You capture!"
+        instrument("Empty! You capture!", display)
         player.score += opponent[-1 * (pit+range)]
         opponent.pits[-1 * (pit+range)] = 0
       end
@@ -135,14 +145,14 @@ class Mancala
 
     until @gameover
       # prompt player
-      move(player, opponent, pick_pit(player, opponent))
+      move(player, opponent, pick_pit(player, opponent), true)
       @gameover = true if player.pits.inject(:+)==0 or opponent.pits.inject(:+)==0
       # switch positions
       player, opponent = opponent, player
     end
 
     # TODO refactor this
-    puts self
+    instrument(self, true)
     if @p1.score > @p2.score
       puts "P1 (#{@p1}) wins with #{@p1.score} to #{@p2.score}!"
     elsif @p2.score > @p1.score
@@ -165,15 +175,7 @@ class Mancala
       p2h_b = p2h_b + " "
     end
     # TODO colorate this?
-    "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6\n\n"
-  end
-
-  def clone
-    clone = self.clone
-    clone.p1 = @p1.clone
-    clone.p2 = @p2.clone
-    clone = Marshal.load(Marshal.dump(self))
-    return clone
+    "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P#{@p1.number}| #{p2h_b}           #{p1h_b} |P#{@p2.number}\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6\n\n"
   end
 end
 
@@ -183,27 +185,21 @@ class Game
   def initialize
     puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
     puts "============================"
-    puts "How many human players? (0-2)"
-    num_players = gets.chomp!
-    until 0.upto(2).include?(num_players.to_i)
+    puts "Enter AI level of Player 1: (0 for human player up to 2)"
+    ainum = gets.chomp!
+    until 0.upto(2).include?(ainum.to_i)
       puts "whoops, try again:\n"
-      num_players = gets.chomp!
+      ainum = gets.chomp!
     end
-    
-    # create the arrays and fill them in w/ proper # of pieces.
-    @gameover = false
-    num_players = num_players.to_i
-    # TODO refactor this
-    if num_players > 0
-      @p1 = Player.new(1)
-    else
-      @p1 = Player.new(1, Engine.new("Master Control Program"))
+    @p1 = Player.new(1, ainum.to_i)
+
+    puts "Enter AI level of Player 2: (0 for human player up to 2)"
+    ainum = gets.chomp!
+    until 0.upto(2).include?(ainum.to_i)
+      puts "whoops, try again:\n"
+      ainum = gets.chomp!
     end
-    if num_players < 2
-      @p2 = Player.new(2, Engine.new("HAL 9000"))
-    else
-      @p2 = Player.new(2)
-    end
+    @p2 = Player.new(2, ainum.to_i)
 
     @game = Mancala.new(@p1, @p2)
   end

@@ -1,20 +1,37 @@
 class Engine
   @name
+  @level
   attr_reader :name
-  def initialize(n)
+  def initialize(n, level=2)
+    @level = level
     @name = n
   end
 
   def move(p1, p2)
-    # TODO treesearch. :)
-    # pick a random move if you can't find another
-    move = 1 + rand(6)
-    until p1.pits[move-1] != 0
+    # random answer
+    if @level == 1
       move = 1 + rand(6)
+        until p1.pits[move-1] != 0
+          move = 1 + rand(6)
+        end
     end
-    t = Mancala.clone
-    binding.pry
-    puts "is the first player 1 same as new player 1? #{p1==t.p1}"
+    # one level eval function
+    if @level == 2
+      # TODO treesearch. :)
+      # TODO all REFACTORED BECAUSE THIS IS AWFUL
+      # pick a random move if you can't find another
+      highest = -999
+      move = 0
+      1.upto(6) do | num |
+        t = Mancala.new(p1.clone, p2.clone)
+        t.move(t.p1, t.p2, num)
+        e = evaluate(t.p1, t.p2)
+        if e >= highest
+          move = num
+          highest = e
+        end
+      end
+    end
     return move
   end
 
@@ -51,7 +68,7 @@ class Engine
     # we should have all the variables needed for an eval
     # evaluate each possible next move, then return the best move
     value = Integer(3*points - 2.5*enemy_points + 3*bonusmoves - 3*enemybonusmoves + 4*captures - 4*enemycaptures)
-    puts "Value of #{p1}'s position: #{value}"
+    instrument("Value of #{p1}'s position: #{value}")
 
     # time to pick a move
     return value
