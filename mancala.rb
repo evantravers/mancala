@@ -1,4 +1,5 @@
 require 'pp'
+require 'pry'
 require './engine.rb'
 
 class Player
@@ -9,6 +10,7 @@ class Player
   @pits
   attr_reader :number, :human, :engine
   attr_accessor :score, :pits
+
   def initialize(player, engine=nil)
     if !engine
       @human = true
@@ -30,9 +32,17 @@ class Player
   end
   
   def engine_eval(opponent)
-    @engine.evaluate(self, opponent)
+    @engine.move(self, opponent)
   end
   
+  def clone
+    clone = self.clone
+    clone.score = @score.clone
+    clone.pits = @pits.clone
+    clone = Marshal.load(Marshal.dump(self))
+    return clone
+  end
+
   def to_s
     if human
       "Player #{number}"
@@ -46,31 +56,10 @@ class Mancala
   @p1
   @p2
   @gameover
+  attr_accessor :p1, :p2
 
-  def initialize
-    puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
-    puts "============================"
-    puts "How many human players? (0-2)"
-    num_players = gets.chomp!
-    until 0.upto(2).include?(num_players.to_i)
-      puts "whoops, try again:\n"
-      num_players = gets.chomp!
-    end
-    
-    # create the arrays and fill them in w/ proper # of pieces.
-    @gameover = false
-    num_players = num_players.to_i
-    # TODO refactor this
-    if num_players > 0
-      @p1 = Player.new(1)
-    else
-      @p1 = Player.new(1, Engine.new("Master Control Program"))
-    end
-    if num_players < 2
-      @p2 = Player.new(2, Engine.new("HAL 9000"))
-    else
-      @p2 = Player.new(2)
-    end
+  def initialize(p1, p2)
+    @p1, @p2 = p1, p2
   end
 
   def pick_pit(player, opponent)
@@ -142,8 +131,7 @@ class Mancala
   def play
     # this should be the game loop
     # you should check for moves, then check to see if game has ended
-    player    = @p1
-    opponent  = @p2
+    player, opponent = @p1, @p2
 
     until @gameover
       # prompt player
@@ -179,11 +167,52 @@ class Mancala
     # TODO colorate this?
     "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6\n\n"
   end
+
+  def clone
+    clone = self.clone
+    clone.p1 = @p1.clone
+    clone.p2 = @p2.clone
+    clone = Marshal.load(Marshal.dump(self))
+    return clone
+  end
 end
 
 class Game
+  @game
+  attr_accessor :game
+  def initialize
+    puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
+    puts "============================"
+    puts "How many human players? (0-2)"
+    num_players = gets.chomp!
+    until 0.upto(2).include?(num_players.to_i)
+      puts "whoops, try again:\n"
+      num_players = gets.chomp!
+    end
+    
+    # create the arrays and fill them in w/ proper # of pieces.
+    @gameover = false
+    num_players = num_players.to_i
+    # TODO refactor this
+    if num_players > 0
+      @p1 = Player.new(1)
+    else
+      @p1 = Player.new(1, Engine.new("Master Control Program"))
+    end
+    if num_players < 2
+      @p2 = Player.new(2, Engine.new("HAL 9000"))
+    else
+      @p2 = Player.new(2)
+    end
 
+    @game = Mancala.new(@p1, @p2)
+  end
+
+  # TODO fix this awful
+  def play
+    @game.play
+  end
 end
 
-game = Mancala.new
+game = Game.new
 game.play
