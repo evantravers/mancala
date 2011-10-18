@@ -73,6 +73,7 @@ class Mancala
     if player.human
       instrument(self, player.human)
       puts "#{player}, enter your move!"
+      binding.pry
       move = gets.chomp!
       if move == "exit"
         puts "bye!"
@@ -185,23 +186,28 @@ class Game
   def initialize
     puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
     puts "============================"
-    puts "Enter AI level of Player 1: (0 for human player up to 2)"
-    ainum = gets.chomp!
-    until 0.upto(2).include?(ainum.to_i)
-      puts "whoops, try again:\n"
+    if ARGV == 0
+      puts "Enter AI level of Player 1: (0 for human player up to 2)"
       ainum = gets.chomp!
-    end
-    @p1 = Player.new(1, ainum.to_i)
+      until 0.upto(2).include?(ainum.to_i)
+        puts "whoops, try again:\n"
+        ainum = gets.chomp!
+      end
+      @p1 = Player.new(1, ainum.to_i)
 
-    puts "Enter AI level of Player 2: (0 for human player up to 2)"
-    ainum = gets.chomp!
-    until 0.upto(2).include?(ainum.to_i)
-      puts "whoops, try again:\n"
+      puts "Enter AI level of Player 2: (0 for human player up to 2)"
       ainum = gets.chomp!
+      until 0.upto(2).include?(ainum.to_i)
+        puts "whoops, try again:\n"
+        ainum = gets.chomp!
+      end
+      @p2 = Player.new(2, ainum.to_i)
+    else
+      @p1 = Player.new(1, ARGV[0].to_i)
+      @p2 = Player.new(2, ARGV[1].to_i)
     end
-    @p2 = Player.new(2, ainum.to_i)
-
     @game = Mancala.new(@p1, @p2)
+    puts "#{@p1} vs. #{@p2}! Go!"
   end
 
   # TODO fix this awful
