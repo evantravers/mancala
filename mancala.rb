@@ -2,7 +2,7 @@ require 'pp'
 require 'pry'
 require './engine.rb'
 
-Names_of_bots = ["Master Control Program", "Tron", "Hal 9000", "Marvin the Paranoid Android", "SHODAN", "EDI", "Cortana", "343 Guilty Spark", "The Intersect", "S.A.R.A.H.", "LCARS"]
+Names_of_bots = ['Master Control Program', 'Tron', 'Hal 9000', 'Marvin the Paranoid Android', 'SHODAN', 'EDI', 'Cortana', '343 Guilty Spark', 'The Intersect', 'S.A.R.A.H.', 'LCARS', 'GLADoS', 'Skynet', 'BASS', 'Jarvis', 'The Chessmaster 3000', 'Mavis Beacon']
 
 def instrument(string, display=false)
   if display
@@ -73,7 +73,6 @@ class Mancala
     if player.human
       instrument(self, player.human)
       puts "#{player}, enter your move!"
-      binding.pry
       move = gets.chomp!
       if move == "exit"
         puts "bye!"
@@ -90,7 +89,7 @@ class Mancala
       end
     else
       # bot!
-      instrument(self, true)
+      instrument(self, player.human)
       # TODO abstract this out of here into the engine
       puts "#{player} is thinking... "
       move = player.engine_eval(opponent)
@@ -125,14 +124,14 @@ class Mancala
       else
         unless player.pits.inject(:+) == 0
           instrument("You get another turn!", display)
-          move(player, opponent, pick_pit(player, opponent), true)
+          move(player, opponent, pick_pit(player, opponent), display)
         end
       end
     else
       # ending on this side of the board... gotta check empty
       # going to be a 1 if capture, because you've already put down the rest of the pieces
       if player[pit+range-1] == 1
-        instrument("Empty! You capture!", display)
+        instrument("Empty! #{player} captures!", display)
         player.score += opponent[-1 * (pit+range)]
         opponent.pits[-1 * (pit+range)] = 0
       end
@@ -149,6 +148,7 @@ class Mancala
       move(player, opponent, pick_pit(player, opponent), true)
       @gameover = true if player.pits.inject(:+)==0 or opponent.pits.inject(:+)==0
       # switch positions
+      puts self
       player, opponent = opponent, player
     end
 
@@ -183,28 +183,34 @@ end
 class Game
   @game
   attr_accessor :game
+  # this method either takes two integers on run, or will prompt for values on game start
   def initialize
     puts ".  . .-. . . .-. .-. .   .-. \n |\/| |-| |\| |   |-| |   |-| \n'  ` ` ' ' ` `-' ` ' `-' ` ' "
     puts "============================"
-    if ARGV == 0
-      puts "Enter AI level of Player 1: (0 for human player up to 2)"
+    if ARGV.size == 0
+      puts "Enter AI level of Player 1: (0 for human player up to 3)"
       ainum = gets.chomp!
-      until 0.upto(2).include?(ainum.to_i)
+      until 0.upto(3).include?(ainum.to_i)
         puts "whoops, try again:\n"
         ainum = gets.chomp!
       end
       @p1 = Player.new(1, ainum.to_i)
 
-      puts "Enter AI level of Player 2: (0 for human player up to 2)"
+      puts "Enter AI level of Player 2: (0 for human player up to 3)"
       ainum = gets.chomp!
-      until 0.upto(2).include?(ainum.to_i)
+      until 0.upto(3).include?(ainum.to_i)
         puts "whoops, try again:\n"
         ainum = gets.chomp!
       end
       @p2 = Player.new(2, ainum.to_i)
     else
-      @p1 = Player.new(1, ARGV[0].to_i)
-      @p2 = Player.new(2, ARGV[1].to_i)
+      if 0.upto(3).include?(ARGV[0].to_i) and 0.upto(3).include?(ARGV[1].to_i)
+        @p1 = Player.new(1, ARGV[0].to_i)
+        @p2 = Player.new(2, ARGV[1].to_i)
+      else
+        puts "only put in two integers, from 0 to 3"
+        exit
+      end
     end
     @game = Mancala.new(@p1, @p2)
     puts "#{@p1} vs. #{@p2}! Go!"

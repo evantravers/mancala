@@ -7,6 +7,23 @@ class Engine
     @name = n
   end
 
+  def iterate(p1, p2, depth_remaining)
+    # for a given position, compute it's value, add to children's positions
+    result = 0
+    if depth_remaining == 0
+      t = Mancala.new(p1.clone, p2.clone)
+      result = evaluate(t.p1, t.p2)
+    else
+      1.upto(6) do | num |
+        t = Mancala.new(p1.clone, p2.clone)
+        t.move(t.p1, t.p2, num, false)
+        result = evaluate(t.p1, t.p2)
+        result += iterate(t.p1, t.p2, depth_remaining - 1)
+      end
+    end
+    return result
+  end
+
   def move(p1, p2)
     # random answer
     if @level == 1
@@ -24,8 +41,22 @@ class Engine
       move = 0
       1.upto(6) do | num |
         t = Mancala.new(p1.clone, p2.clone)
-        t.move(t.p1, t.p2, num)
+        t.move(t.p1, t.p2, num, false)
         e = evaluate(t.p1, t.p2)
+        if e >= highest
+          move = num
+          highest = e
+        end
+      end
+    end
+    if @level == 3
+      highest = -999
+      move = 0
+      depth = 1
+      1.upto(6) do | num |
+        t = Mancala.new(p1.clone, p2.clone)
+        t.move(t.p1, t.p2, num, false)
+        e = iterate(t.p1, t.p2, depth)
         if e >= highest
           move = num
           highest = e
