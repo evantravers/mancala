@@ -39,7 +39,7 @@ class Engine
     end
     result = -Float::INFINITY
     1.upto(6) do | num |
-      if p1[num] != 0
+      if p1[num-1] != 0
         t1 = p1.clone
         t2 = p2.clone
         t1.move(t2, num, false)
@@ -64,23 +64,11 @@ class Engine
       highest = -Float::INFINITY
       move = 0
       1.upto(6) do | num |
-        t1 = p1.clone
-        t2 = p2.clone
-        t1.move(t2,num,false)
-        e = evaluate(t1, t2)
-        if e >= highest
-          move = num
-          highest = e
-        end
-      end
-    end
-    if @level == 3
-      highest = -Float::INFINITY
-      move = 0
-      depth = 0
-      1.upto(6) do | num |
         if p1[num-1] != 0
-          e = minimax(p1, p2, depth)
+          t1 = p1.clone
+          t2 = p2.clone
+          t1.move(t2,num,false)
+          e = evaluate(t1, t2)
           if e >= highest
             move = num
             highest = e
@@ -88,7 +76,20 @@ class Engine
         end
       end
     end
-    instrument("moving #{self}'s pit \##{move}\n", true)
+    if @level == 3
+      highest = -Float::INFINITY
+      move = 0
+      1.upto(6) do | num |
+        if p1[num-1] != 0
+          e = minimax(p1, p2, 2)
+          if e >= highest
+            move = num
+            highest = e
+          end
+        end
+      end
+    end
+    instrument("moving #{self}'s (P#{p1.number}) pit \##{move}\n", true)
     return move
   end
 
@@ -122,7 +123,8 @@ class Engine
     end
     # we should have all the variables needed for an eval
     # evaluate each possible next move, then return the best move
-  value = Integer(5*points - 5*enemy_points + 9*bonusmoves - 9*enemybonusmoves + 4*captures - 4*enemycaptures)
+    # TODO read from file, and hill climb
+    value = Integer(5*points - 5*enemy_points + 9*bonusmoves - 9*enemybonusmoves + 4*captures - 4*enemycaptures)
     instrument("Value of #{p1}'s position: #{value}")
 
     # time to pick a move
