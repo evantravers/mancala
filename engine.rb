@@ -39,10 +39,12 @@ class Engine
     end
     result = -Float::INFINITY
     1.upto(6) do | num |
-      t1 = p1.clone
-      t2 = p2.clone
-      t1.move(t2, num, false)
-      result = [result, -minimax(t2, t1, depth_remaining-1)].max
+      if p1[num] != 0
+        t1 = p1.clone
+        t2 = p2.clone
+        t1.move(t2, num, false)
+        result = [result, -minimax(t1, t2, depth_remaining-1)].max
+      end
     end
     return result
   end
@@ -75,7 +77,7 @@ class Engine
     if @level == 3
       highest = -Float::INFINITY
       move = 0
-      depth = 3
+      depth = 0
       1.upto(6) do | num |
         if p1[num-1] != 0
           e = minimax(p1, p2, depth)
@@ -86,6 +88,7 @@ class Engine
         end
       end
     end
+    instrument("moving #{self}'s pit \##{move}\n", true)
     return move
   end
 
@@ -119,7 +122,7 @@ class Engine
     end
     # we should have all the variables needed for an eval
     # evaluate each possible next move, then return the best move
-    value = Integer(3*points - 3*enemy_points + 3*bonusmoves - 3*enemybonusmoves + 4*captures - 4*enemycaptures)
+  value = Integer(5*points - 5*enemy_points + 9*bonusmoves - 9*enemybonusmoves + 4*captures - 4*enemycaptures)
     instrument("Value of #{p1}'s position: #{value}")
 
     # time to pick a move

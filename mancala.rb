@@ -32,6 +32,7 @@ class Player
   end
 
   def pick_pit(opponent)
+    puts state(opponent)
     if self.human
       instrument(self, self.human)
       puts "#{self}, enter your move!"
@@ -53,11 +54,35 @@ class Player
       # bot!
       instrument(self, self.human)
       # TODO abstract this out of here into the engine
-      puts "#{self} is thinking... "
+      instrument("#{self} is thinking... ", false)
       move = self.engine_eval(opponent)
     end
     return move
     
+  end
+
+  def state(opponent)
+    # TODO REFACTOR
+    if @number == 1
+      p1s = @pits
+      p2s = opponent.pits
+      p1h_b = @score.to_s
+      p2h_b = opponent.score.to_s
+    else
+      p2s = @pits
+      p1s = opponent.pits
+      p2h_b = @score.to_s
+      p1h_b = opponent.score.to_s
+    end
+
+    if p1h_b.size == 1 
+      p1h_b = " " + p1h_b
+    end
+    if p2h_b.size == 1 
+      p2h_b = p2h_b + " "
+    end
+    # TODO colorate this?
+    "\n        6 5 4 3 2 1  \n    +-----------------+\n    |  #{p2s[6]} #{p2s[5]} #{p2s[4]} #{p2s[3]} #{p2s[2]} #{p2s[1]} #{p2s[0]}   |\n  P2| #{p2h_b}           #{p1h_b} |P1\n    |   #{p1s[0]} #{p1s[1]} #{p1s[2]} #{p1s[3]} #{p1s[4]} #{p1s[5]} #{p1s[6]}  |\n    +-----------------+\n        1 2 3 4 5 6\n\n"
   end
 
   # accepts a value between 1 and 6
@@ -65,7 +90,7 @@ class Player
     if self.human
       display = true
     end
-    instrument("moving #{self}'s pit \##{pit}\n", display)
+    instrument("moving #{self}'s pit \##{pit}\n", self.human)
     pit=pit.to_i
     remaining = self[pit-1]
     range = remaining
@@ -148,12 +173,11 @@ class Mancala
       player.move(opponent, player.pick_pit(opponent), true)
       @gameover = true if player.pits.inject(:+)==0 or opponent.pits.inject(:+)==0
       # switch positions
-      puts self
       player, opponent = opponent, player
     end
 
     # TODO refactor this
-    instrument(self, true)
+    puts @p1.state(@p2)
     if @p1.score > @p2.score
       puts "P1 (#{@p1}) wins with #{@p1.score} to #{@p2.score}!"
     elsif @p2.score > @p1.score
