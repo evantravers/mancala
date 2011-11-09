@@ -31,6 +31,72 @@ class Player
     @pits = Array.new(6).map{|slot| slot = 3}
   end
 
+  def pick_pit(opponent)
+    if self.human
+      instrument(self, self.human)
+      puts "#{self}, enter your move!"
+      move = gets.chomp!
+      if move == "exit"
+        puts "bye!"
+        exit
+      end
+      move = move.to_i
+      until 1.upto(6).include?(move)
+        puts "Please enter an integer from 1-6:"
+        move = gets.chomp!.to_i
+      end
+      until self[move-1] != 0
+        puts "Don't pick an empty space! Pick again:"
+        move = gets.chomp!.to_i
+      end
+    else
+      # bot!
+      instrument(self, self.human)
+      # TODO abstract this out of here into the engine
+      puts "#{self} is thinking... "
+      move = self.engine_eval(opponent)
+    end
+    return move
+    
+  end
+
+  # accepts a value between 1 and 6
+  def move(opponent, pit, display=false)
+    if self.human
+      display = true
+    end
+    instrument("moving #{self}'s pit \##{pit}\n", display)
+    pit=pit.to_i
+    remaining = self[pit-1]
+    range = remaining
+    self.pits[pit-1]=0
+    self.pits[pit, remaining]=self.pits[pit, remaining].map!{|t| t += 1}
+    # subtract the items you have dropped
+    remaining = remaining - self[pit..-1].size
+    if remaining > 0
+      # then this goes around the board
+      # put one in your home
+      remaining -= 1
+      self.score += 1
+      if remaining > 0
+        opponent.pits[0, remaining]=self.pits[0, remaining].map!{|t| t += 1}
+      else
+        unless self.pits.inject(:+) == 0
+          instrument("You get another turn!", display)
+          self.move(opponent, self.pick_pit(opponent), display)
+        end
+      end
+    else
+      # ending on this side of the board... gotta check empty
+      # going to be a 1 if capture, because you've already put down the rest of the pieces
+      if self[pit+range-1] == 1
+        instrument("Empty! #{self} captures!", display)
+        self.score += opponent[-1 * (pit+range)]
+        opponent.pits[-1 * (pit+range)] = 0
+      end
+    end
+  end
+
   def [] n
     @pits[n]
   end
@@ -64,79 +130,13 @@ class Mancala
   @p2
   @gameover
   attr_accessor :p1, :p2
+  attr_reader :gameover
 
   def initialize(p1, p2)
     @p1, @p2 = p1, p2
   end
 
-  def pick_pit(player, opponent)
-    if player.human
-      instrument(self, player.human)
-      puts "#{player}, enter your move!"
-      move = gets.chomp!
-      if move == "exit"
-        puts "bye!"
-        exit
-      end
-      move = move.to_i
-      until 1.upto(6).include?(move)
-        puts "Please enter an integer from 1-6:"
-        move = gets.chomp!.to_i
-      end
-      until player[move-1] != 0
-        puts "Don't pick an empty space! Pick again:"
-        move = gets.chomp!.to_i
-      end
-    else
-      # bot!
-      instrument(self, player.human)
-      # TODO abstract this out of here into the engine
-      puts "#{player} is thinking... "
-      move = player.engine_eval(opponent)
-    end
-    return move
-    
-    def state
-      return @p1.score, @p1.pits, @p2.score, @p2.pits      
-    end
-  end
 
-  # accepts a value between 1 and 6
-  def move(player, opponent, pit, display=false)
-    if player.human
-      display = true
-    end
-    instrument("moving #{player}'s pit \##{pit}\n", display)
-    pit=pit.to_i
-    remaining = player[pit-1]
-    range = remaining
-    player.pits[pit-1]=0
-    player.pits[pit, remaining]=player.pits[pit, remaining].map!{|t| t += 1}
-    # subtract the items you have dropped
-    remaining = remaining - player[pit..-1].size
-    if remaining > 0
-      # then this goes around the board
-      # put one in your home
-      remaining -= 1
-      player.score += 1
-      if remaining > 0
-        opponent.pits[0, remaining]=player.pits[0, remaining].map!{|t| t += 1}
-      else
-        unless player.pits.inject(:+) == 0
-          instrument("You get another turn!", display)
-          move(player, opponent, pick_pit(player, opponent), display)
-        end
-      end
-    else
-      # ending on this side of the board... gotta check empty
-      # going to be a 1 if capture, because you've already put down the rest of the pieces
-      if player[pit+range-1] == 1
-        instrument("Empty! #{player} captures!", display)
-        player.score += opponent[-1 * (pit+range)]
-        opponent.pits[-1 * (pit+range)] = 0
-      end
-    end
-  end
 
   def play
     # this should be the game loop
@@ -145,7 +145,7 @@ class Mancala
 
     until @gameover
       # prompt player
-      move(player, opponent, pick_pit(player, opponent), true)
+      player.move(opponent, player.pick_pit(opponent), true)
       @gameover = true if player.pits.inject(:+)==0 or opponent.pits.inject(:+)==0
       # switch positions
       puts self
